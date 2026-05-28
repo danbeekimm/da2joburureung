@@ -2,6 +2,8 @@ package common.exception;
 
 import common.dto.CommonResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
@@ -42,6 +44,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<CommonResponse<?>> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
         log.warn("[HttpMessageNotReadableException] message={}", e.getMessage());
         return CommonResponse.error(ErrorCode.INVALID_INPUT);
+    }
+
+    // 비관적 락 타임아웃 / 락 획득 실패
+    @ExceptionHandler({CannotAcquireLockException.class, PessimisticLockingFailureException.class})
+    public ResponseEntity<CommonResponse<?>> handleLockTimeout(Exception e) {
+        log.warn("[LockTimeout] message={}", e.getMessage());
+        return CommonResponse.error(ErrorCode.LOCK_TIMEOUT);
     }
 
     // 나머지 예상 못한 예외상황

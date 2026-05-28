@@ -121,6 +121,7 @@ public class DeliveryManagerRepositoryAdapter implements DeliveryManagerReposito
                 )
                 .orderBy(qDeliveryManager.seq.asc())
                 .setLockMode(LockModeType.PESSIMISTIC_WRITE)
+                .setHint("jakarta.persistence.lock.timeout", 3000)
                 .fetch();
     }
 

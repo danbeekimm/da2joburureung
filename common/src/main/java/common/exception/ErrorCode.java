@@ -37,6 +37,7 @@ public enum ErrorCode {
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR", "서버 오류가 발생했습니다."),
     INVALID_PAGE_SIZE(HttpStatus.BAD_REQUEST, "INVALID_PAGE_SIZE", "페이지 크기는 10, 30, 50만 가능합니다."),
     INVALID_SORT_BY(HttpStatus.BAD_REQUEST, "INVALID_SORT_BY", "정렬 기준이 올바르지 않습니다."),
+    LOCK_TIMEOUT(HttpStatus.CONFLICT, "LOCK_TIMEOUT", "처리 중 잠금 대기 시간을 초과했습니다. 잠시 후 다시 시도해주세요."),
 
     // ── Company ───────────────────────────────────────
     COMPANY_NOT_FOUND(HttpStatus.NOT_FOUND, "COMPANY_NOT_FOUND", "존재하지 않는 업체입니다."),
