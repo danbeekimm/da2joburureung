@@ -1,0 +1,19 @@
+# wrangler 로 폴백 Worker 배포: `wrangler deploy`
+# 아래 example.com 을 본인 도메인으로 모두 바꾸세요.
+
+name = "da2jobu-fallback"
+main = "worker.js"
+compatibility_date = "2024-11-01"
+
+# 사용자 진입점. custom_domain=true 면 DNS 가 자동 생성됨(별도 레코드 불필요).
+# 무료 플랜에서 사용 가능. (1단계 서브도메인이라 Universal SSL 자동 적용)
+[[routes]]
+pattern = "da2jobu.da2joburureung.site"
+custom_domain = true
+
+[vars]
+# 운영시간 동안 프록시할 오리진(터널) 호스트. terraform output worker_origin_value 값.
+ORIGIN = "https://origin.da2joburureung.site"
+OPEN_HOUR = "9"
+CLOSE_HOUR = "21"
+WEEKDAYS_ONLY = "true" # 주말 제외(평일만 운영). EC2/RDS 스케줄과 일치

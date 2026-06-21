@@ -1,0 +1,50 @@
+# 이 파일을 terraform.tfvars 로 복사한 뒤 값을 채우세요. (terraform.tfvars 는 git 에 올리지 말 것)
+
+aws_region    = "us-east-1"
+instance_type = "t3.medium" # 데모 중 느리면 "t3.large" 로 변경
+
+# SSH 공개키: 내용을 직접 붙이거나 ec2.tf 에서 file() 로 읽도록 변경
+ssh_public_key = "ssh-ed25519 AAAA... you@host"
+
+# 보안상 본인 IP/32 로 제한 권장 (예: curl -s ifconfig.me 로 확인)
+allowed_ssh_cidr = "0.0.0.0/0"
+
+# 포트 공개 (Cloudflare Tunnel 사용 시 둘 다 false 권장)
+expose_app_http = false # true 면 8080 인터넷 직접 공개(디버깅용)
+expose_eureka   = false
+
+# 운영시간 자동 전원 제어 (KST 09~21)
+enable_scheduler    = true
+schedule_timezone   = "Asia/Seoul"
+start_schedule_cron = "cron(40 8 ? * MON-FRI *)" # 평일 08:40 기동
+stop_schedule_cron  = "cron(0 21 ? * MON-FRI *)" # 평일 21:00 중지
+
+# ── Cloudflare 하이브리드 (Tunnel + origin DNS + SSL 을 Terraform 으로 관리) ──
+# false 면 Cloudflare 리소스를 만들지 않음(AWS 만 배포). 준비되면 true 로.
+manage_cloudflare     = true
+cloudflare_api_token  = "cf_api_token_xxx" # 스코프: Zone:DNS:Edit, Zone:Zone Settings:Edit, Account:Cloudflare Tunnel:Edit
+cloudflare_account_id = "your_account_id"
+cloudflare_zone_id    = "your_zone_id"
+domain                = "example.com" # 가비아에서 사서 Cloudflare 로 옮긴 도메인
+origin_subdomain      = "origin"      # 결과: origin.example.com (Worker 의 ORIGIN 대상)
+cloudflare_ssl_mode   = "full"
+
+# 수동 모드용(manage_cloudflare=false 일 때만). true 면 TF가 토큰을 자동 생성·주입.
+cloudflare_tunnel_token = ""
+
+# RDS
+db_instance_class = "db.t3.micro" # 프리티어
+db_username       = "da2jobu"
+
+# CI / GitHub Actions OIDC
+github_repo          = "nbcamp-project-02-team2/da2joburureung"
+enable_github_oidc   = true
+create_oidc_provider = true  # 계정에 GitHub OIDC 공급자가 이미 있으면 false
+image_tag            = "latest"
+
+# 비밀값 (작은따옴표 문자는 피해주세요)
+postgres_password   = "p@ssw0rd" # RDS 마스터 비밀번호
+jwt_secret          = "12345678901234567890123456789012"
+kakao_api_key       = "496564f3c310718b565e9b52f14c43a0" # hub/hubpath 거리계산용. 없으면 빈 값
+internal_token      = "internal-token-value"
+internal_api_secret = "internal-api-secret-value"

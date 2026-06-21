@@ -1,0 +1,128 @@
+# ==============================================================
+# 배포용 오버라이드 (t3.medium / 4GB + RDS + ECR)
+#
+# 사용:  docker compose -f docker-compose.yml -f docker-compose.deploy.yml \
+#          pull <svc...> && ... up -d --no-build <svc...>
+#        (실제로는 /opt/app/deploy.sh 가 대행)
+#
+# 이 파일이 하는 일:
+#  1) image:        각 서비스를 ECR 이미지로 교체 (온박스 빌드 대신 pull)
+#  2) DB URL:       SPRING_DATASOURCE_URL 을 RDS(${DB_HOST}) 로 교체
+#  3) postgres:     로컬 DB 대신 "플레이스홀더"로 대체 → depends_on 충족용,
+#                   실제 DB는 RDS. (compose 가 postgres host 를 전제로 짜여 있어서)
+#  4) JVM 힙/메모리 상한 + restart 정책
+#
+# 필요한 .env 변수: ECR_REGISTRY, ECR_REPO_PREFIX, IMAGE_TAG, DB_HOST
+# ==============================================================
+services:
+  eureka-server:
+    image: ${ECR_REGISTRY}/${ECR_REPO_PREFIX}/eureka-server:${IMAGE_TAG}
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xmx128m -XX:+UseSerialGC -XX:MaxMetaspaceSize=112m -Xss512k -XX:+ExitOnOutOfMemoryError -Dspring.jmx.enabled=false"
+    mem_limit: 300m
+    restart: unless-stopped
+
+  gateway-service:
+    image: ${ECR_REGISTRY}/${ECR_REPO_PREFIX}/gateway-service:${IMAGE_TAG}
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xmx192m -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m -Xss512k -XX:+ExitOnOutOfMemoryError -Dspring.jmx.enabled=false"
+    mem_limit: 360m
+    restart: unless-stopped
+
+  user-service:
+    image: ${ECR_REGISTRY}/${ECR_REPO_PREFIX}/user-service:${IMAGE_TAG}
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xmx192m -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m -Xss512k -XX:+ExitOnOutOfMemoryError -Dspring.jmx.enabled=false"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${DB_HOST}:5432/userdb
+    mem_limit: 360m
+    restart: unless-stopped
+
+  product-service:
+    image: ${ECR_REGISTRY}/${ECR_REPO_PREFIX}/product-service:${IMAGE_TAG}
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xmx192m -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m -Xss512k -XX:+ExitOnOutOfMemoryError -Dspring.jmx.enabled=false"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${DB_HOST}:5432/productdb
+    mem_limit: 360m
+    restart: unless-stopped
+
+  order-service:
+    image: ${ECR_REGISTRY}/${ECR_REPO_PREFIX}/order-service:${IMAGE_TAG}
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xmx208m -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m -Xss512k -XX:+ExitOnOutOfMemoryError -Dspring.jmx.enabled=false"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${DB_HOST}:5432/orderdb
+    mem_limit: 384m
+    restart: unless-stopped
+
+  company-service:
+    image: ${ECR_REGISTRY}/${ECR_REPO_PREFIX}/company-service:${IMAGE_TAG}
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xmx208m -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m -Xss512k -XX:+ExitOnOutOfMemoryError -Dspring.jmx.enabled=false"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${DB_HOST}:5432/companydb
+    mem_limit: 384m
+    restart: unless-stopped
+
+  delivery-service:
+    image: ${ECR_REGISTRY}/${ECR_REPO_PREFIX}/delivery-service:${IMAGE_TAG}
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xmx192m -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m -Xss512k -XX:+ExitOnOutOfMemoryError -Dspring.jmx.enabled=false"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${DB_HOST}:5432/deliverydb
+    mem_limit: 360m
+    restart: unless-stopped
+
+  hub-service:
+    image: ${ECR_REGISTRY}/${ECR_REPO_PREFIX}/hub-service:${IMAGE_TAG}
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xmx176m -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m -Xss512k -XX:+ExitOnOutOfMemoryError -Dspring.jmx.enabled=false"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${DB_HOST}:5432/hubdb
+    mem_limit: 340m
+    restart: unless-stopped
+
+  hubpath-service:
+    image: ${ECR_REGISTRY}/${ECR_REPO_PREFIX}/hubpath-service:${IMAGE_TAG}
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xmx176m -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m -Xss512k -XX:+ExitOnOutOfMemoryError -Dspring.jmx.enabled=false"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${DB_HOST}:5432/hubdb
+    mem_limit: 340m
+    restart: unless-stopped
+
+  # ── 인프라 ──
+  kafka:
+    environment:
+      KAFKA_HEAP_OPTS: "-Xmx512m -Xms256m"
+    mem_limit: 768m
+    restart: unless-stopped
+
+  zookeeper:
+    environment:
+      KAFKA_HEAP_OPTS: "-Xmx256m -Xms128m"
+    mem_limit: 384m
+    restart: unless-stopped
+
+  redis:
+    mem_limit: 96m
+
+  # 실제 DB는 RDS. 이 컨테이너는 depends_on(postgres) 을 만족시키기 위한 더미.
+  # alpine 으로 교체하고 healthcheck 를 항상 성공시켜 의존 서비스가 바로 기동되게 함.
+  postgres:
+    image: alpine:3.20
+    command: ["tail", "-f", "/dev/null"]
+    healthcheck:
+      test: ["CMD-SHELL", "exit 0"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    mem_limit: 32m
+
+  # Cloudflare Tunnel: 아웃바운드로 CF 에 연결 → 인바운드 포트/EIP 불필요.
+  # Zero Trust 대시보드에서 Public Hostname(origin.<도메인>) → http://gateway-service:8080 으로 설정.
+  cloudflared:
+    image: cloudflare/cloudflared:2024.10.0
+    command: ["tunnel", "--no-autoupdate", "run"]
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
+    restart: unless-stopped
+    mem_limit: 96m
+    networks:
+      - kafka-network
+    depends_on:
+      - gateway-service
