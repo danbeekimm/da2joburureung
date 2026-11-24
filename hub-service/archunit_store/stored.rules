@@ -1,0 +1,5 @@
+#
+#Tue Nov 24 17:29:49 KST 2026
+no\ classes\ should\ be\ annotated\ with\ @RestControllerAdvice\ or\ should\ be\ annotated\ with\ @ControllerAdvice=639ba5aa-937d-496c-992f-ae8fcc7c7ca8
+no\ classes\ that\ reside\ in\ a\ package\ '..domain..'\ should\ depend\ on\ classes\ that\ reside\ in\ any\ package\ ['..infrastructure..',\ '..presentation..',\ '..interfaces..']=2b2bf55e-93f1-484c-baf3-00f4a5f541e0
+Layered\ architecture\ considering\ only\ dependencies\ in\ layers,\ consisting\ of\ (optional)\nlayer\ 'Presentation'\ ('..presentation..',\ '..interfaces..')\nlayer\ 'Application'\ ('..application..')\nlayer\ 'Domain'\ ('..domain..')\nlayer\ 'Infrastructure'\ ('..infrastructure..')\nwhere\ layer\ 'Presentation'\ may\ not\ be\ accessed\ by\ any\ layer\nwhere\ layer\ 'Application'\ may\ only\ be\ accessed\ by\ layers\ ['Presentation',\ 'Infrastructure']\nwhere\ layer\ 'Domain'\ may\ only\ be\ accessed\ by\ layers\ ['Application',\ 'Infrastructure']\nwhere\ layer\ 'Infrastructure'\ may\ not\ be\ accessed\ by\ any\ layer=9b30a919-9695-462a-85b9-a13cc43cd2da
