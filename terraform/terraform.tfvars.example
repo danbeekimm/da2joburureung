@@ -43,8 +43,8 @@ create_oidc_provider = true  # 계정에 GitHub OIDC 공급자가 이미 있으�
 image_tag            = "latest"
 
 # 비밀값 (작은따옴표 문자는 피해주세요)
-postgres_password   = "p@ssw0rd" # RDS 마스터 비밀번호
-jwt_secret          = "12345678901234567890123456789012"
-kakao_api_key       = "496564f3c310718b565e9b52f14c43a0" # hub/hubpath 거리계산용. 없으면 빈 값
-internal_token      = "internal-token-value"
-internal_api_secret = "internal-api-secret-value"
+postgres_password   = "change-me" # RDS 마스터 비밀번호
+jwt_secret          = "change-me-32-chars-or-longer-secret"
+kakao_api_key       = "your-kakao-rest-api-key" # hub/hubpath 거리계산용. 없으면 빈 값
+internal_token      = "change-me-internal-token"
+internal_api_secret = "change-me-internal-api-secret"

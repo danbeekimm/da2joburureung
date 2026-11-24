@@ -30,7 +30,7 @@ spring:
 
 kakao:
   api:
-    key: 496564f3c310718b565e9b52f14c43a0
+    key: ${KAKAO_API_KEY:}
 
 resilience4j:
   circuitbreaker:

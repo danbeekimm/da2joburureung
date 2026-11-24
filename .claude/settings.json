@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew build:*)",
+      "Bash(./gradlew test:*)",
+      "Bash(./gradlew archTest:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(terraform fmt:*)",
+      "Bash(terraform validate:*)",
+      "Bash(scripts/check-no-secrets.sh:*)",
+      "Bash(scripts/mask-secrets.sh:*)"
+    ],
+    "ask": [
+      "Bash(docker compose:*)",
+      "Bash(terraform plan:*)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Edit(./.env)",
+      "Read(./terraform/terraform.tfvars)",
+      "Edit(./terraform/terraform.tfvars)",
+      "Read(./terraform/terraform.tfstate)",
+      "Read(./terraform/terraform.tfstate.backup)",
+      "Bash(terraform apply:*)",
+      "Bash(terraform destroy:*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard-bash.sh\""
+          }
+        ]
+      }
+    ]
+  }
+}
